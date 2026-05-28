@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template to provision the Target EC2 Web Server for CodeDeploy.
+
+Resources:
+  MyTargetWebServer:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-003c463c8207b4e3d  # Ubuntu 22.04 LTS LTS in ap-southeast-1 (Safer Ruby Version!)
+      KeyName: 1st_key.pem            # Your key pair name
+      IamInstanceProfile: EC2-Pipeline-Role  # The role we built in Phase 1
+      SecurityGroupIds:
+        - !Ref WebServerSecurityGroup
+      Tags:
+        - Key: Environment
+          Value: Production
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          apt-get update -y
+          apt-get install -y ruby-full wget
+          cd /home/ubuntu
+          wget https://aws-codedeploy-ap-southeast-1.s3.ap-southeast-1.amazonaws.com/latest/install
+          chmod +x ./install
+          ./install auto
+
+  WebServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP and SSH traffic
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  InstanceId:
+    Description: The Instance ID of the newly created web server
+    Value: !Ref MyTargetWebServer
