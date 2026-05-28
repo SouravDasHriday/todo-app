@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow Enterprise</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8fafc; font-family: 'Segoe UI', system-ui, sans-serif; }
+        .navbar-brand { font-weight: 700; letter-spacing: -0.5px; }
+        .card-container { border: none; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-dark bg-dark py-3">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1">📋 TaskFlow Enterprise</span>
+            <span class="badge bg-success">v1.0.0 Live</span>
+        </div>
+    </nav>
+
+    <div class="container my-5" style="max-width: 800px;">
+        <div class="card card-container p-4 mb-4 bg-white">
+            <h4 class="mb-3 text-secondary">Create New Project Task</h4>
+            <form th:action="@{/add}" method="POST" class="row g-3">
+                <div class="col-md-7">
+                    <input type="text" name="description" class="form-control form-control-lg" placeholder="What needs to be done?" required>
+                </div>
+                <div class="col-md-3">
+                    <select name="priority" class="form-select form-select-lg">
+                        <option value="High">High</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">Add</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card card-container p-4 bg-white">
+            <h4 class="mb-3 text-secondary">Active Sprint Objectives</h4>
+            <div th:if="${tasks.isEmpty()}" class="text-center py-4 text-muted">
+                No active tasks. Good job!
+            </div>
+            <table th:if="${!tasks.isEmpty()}" class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Task Description</th>
+                        <th style="width: 150px;">Priority Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="task : ${tasks}">
+                        <td class="fw-semibold text-dark" th:text="${task.description}">Task Description</td>
+                        <td>
+                            <span th:if="${task.priority == 'High'}" class="badge bg-danger px-3 py-2">High</span>
+                            <span th:if="${task.priority == 'Medium'}" class="badge bg-warning text-dark px-3 py-2">Medium</span>
+                            <span th:if="${task.priority == 'Low'}" class="badge bg-info text-dark px-3 py-2">Low</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>
