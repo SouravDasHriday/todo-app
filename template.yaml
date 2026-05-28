@@ -6,19 +6,28 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
-      ImageId: ami-003c463c8207b4e3d  # Ubuntu 22.04 LTS LTS in ap-southeast-1 (Safer Ruby Version!)
-      KeyName: 1st_key.pem            # Your key pair name
-      IamInstanceProfile: EC2-Pipeline-Role  # The role we built in Phase 1
+      # DYNAMIC LOOKUP: Safely grabs the latest valid Ubuntu 22.04 AMI in Singapore
+      ImageId: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}'
+      
+      # CORRECTED: Removed the '.pem' extension so AWS doesn't crash
+      KeyName: 1st_key
+      
+      IamInstanceProfile: EC2-Pipeline-Role
       SecurityGroupIds:
         - !Ref WebServerSecurityGroup
       Tags:
         - Key: Environment
           Value: Production
+      # MERGED: Single clean UserData block that handles both Java 8 and CodeDeploy setup
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
           apt-get update -y
+          # 1. Install Java 8 first so the Spring Boot app can run
+          apt-get install -y openjdk-8-jdk
+          # 2. Install Ruby and Wget for CodeDeploy agent
           apt-get install -y ruby-full wget
+          # 3. Download and install the agent for ap-southeast-1
           cd /home/ubuntu
           wget https://aws-codedeploy-ap-southeast-1.s3.ap-southeast-1.amazonaws.com/latest/install
           chmod +x ./install
