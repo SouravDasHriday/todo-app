@@ -7,7 +7,8 @@ phases:
   pre_build:
     commands:
       - echo "Authenticating with AWS CodeArtifact..."
-      - export CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain my-domain --domain-owner $AWS_ACCOUNT_ID --query authorizationToken --output text)
+      - export CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain my-domain --domain-owner 063884340653 --query authorizationToken --output text)
+      - echo "Token retrieval complete!"
   build:
     commands:
       - echo "Building the Java application..."
