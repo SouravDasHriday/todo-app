@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Todo List | Infrastructure Task Manager</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0f172a;
+            font-family: 'Inter', sans-serif;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(90deg, #020617, #111827);
+            border-bottom: 1px solid #1e293b;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #38bdf8 !important;
+            letter-spacing: -0.5px;
+        }
+
+        .version-badge {
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 30px;
+        }
+
+        /* Main */
+        .main-content {
+            flex: 1;
+        }
+
+        /* Cards */
+        .card-container {
+            background: #111827;
+            border: 1px solid #1e293b;
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+            transition: 0.3s ease;
+        }
+
+        .card-container:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.45);
+        }
+
+        /* Titles */
+        .section-title {
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .section-subtitle {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        /* Inputs */
+        .form-control,
+        .form-select {
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: #e2e8f0;
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .form-control::placeholder {
+            color: #64748b;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background: #0f172a;
+            color: #fff;
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 0.15rem rgba(56, 189, 248, 0.25);
+        }
+
+        /* Buttons */
+        .btn-deploy {
+            background: linear-gradient(135deg, #0ea5e9, #2563eb);
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            color: white;
+            transition: 0.3s ease;
+        }
+
+        .btn-deploy:hover {
+            background: linear-gradient(135deg, #0284c7, #1d4ed8);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger-outline {
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            border-radius: 10px;
+            background: transparent;
+            transition: 0.3s ease;
+        }
+
+        .btn-danger-outline:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        /* Table */
+        .table {
+            color: #e2e8f0;
+        }
+
+        .table thead {
+            background: #1e293b;
+        }
+
+        .table th {
+            border: none;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .table td {
+            border-color: #1e293b;
+            vertical-align: middle;
+        }
+
+        .table-hover tbody tr:hover {
+            background: rgba(56, 189, 248, 0.08);
+        }
+
+        /* Priority Badges */
+        .badge {
+            padding: 10px 14px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Empty State */
+        .empty-state {
+            color: #94a3b8;
+        }
+
+        /* Footer */
+        footer {
+            background: #020617;
+            border-top: 1px solid #1e293b;
+            padding: 22px 0;
+            margin-top: auto;
+        }
+
+        .footer-title {
+            color: #38bdf8;
+            font-weight: 700;
+        }
+
+        footer small {
+            color: #94a3b8;
+        }
+
+        footer a {
+            color: #38bdf8;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: #7dd3fc;
+        }
+
+        /* Terminal Badge */
+        .terminal-badge {
+            background: #111827;
+            color: #22c55e;
+            border: 1px solid #22c55e;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-family: monospace;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark py-3">
+
+        <div class="container">
+
+            <div class="d-flex align-items-center gap-3">
+
+                <span class="navbar-brand">
+                    ⚙️ My Todo List
+                </span>
+
+                <span class="terminal-badge">
+                    root@sourav:~#
+                </span>
+
+            </div>
+
+            <span class="version-badge">
+                Version 1.0.0 • LIVE
+            </span>
+
+        </div>
+
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container my-5 main-content" style="max-width: 950px;">
+
+        <!-- Add Task -->
+        <div class="card card-container p-4 mb-4">
+
+            <div class="mb-4">
+
+                <h3 class="section-title mb-1">
+                    Infrastructure Deployment Tasks
+                </h3>
+
+                <p class="section-subtitle mb-0">
+                    Monitor deployments, automate pipelines, and manage cloud operations.
+                </p>
+
+            </div>
+
+            <form th:action="@{/add}" method="POST" class="row g-3">
+
+                <div class="col-md-7">
+
+                    <input
+                        type="text"
+                        name="description"
+                        class="form-control form-control-lg"
+                        placeholder="Example: Configure Jenkins CI/CD pipeline..."
+                        required>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <select name="priority" class="form-select form-select-lg">
+
+                        <option value="High">
+                            🔥 Critical
+                        </option>
+
+                        <option value="Medium" selected>
+                            ⚡ Important
+                        </option>
+
+                        <option value="Low">
+                            ✅ Routine
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-2 d-grid">
+
+                    <button type="submit"
+                            class="btn btn-deploy btn-lg">
+
+                        Deploy
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+        <!-- Task Table -->
+        <div class="card card-container p-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <div>
+
+                    <h3 class="section-title mb-1">
+                        Active DevOps Operations
+                    </h3>
+
+                    <p class="section-subtitle mb-0">
+                        Current infrastructure and deployment activities.
+                    </p>
+
+                </div>
+
+                <form th:action="@{/clear}" method="POST" class="m-0">
+
+                    <button type="submit"
+                            class="btn btn-danger-outline">
+
+                        Purge Queue
+
+                    </button>
+
+                </form>
+
+            </div>
+
+            <!-- Empty -->
+            <div th:if="${tasks.isEmpty()}"
+                 class="text-center py-5 empty-state">
+
+                <h5 class="fw-semibold">
+                    🚀 All systems operational
+                </h5>
+
+                <p class="mb-0">
+                    No pending DevOps tasks in the deployment queue.
+                </p>
+
+            </div>
+
+            <!-- Table -->
+            <table th:if="${!tasks.isEmpty()}"
+                   class="table table-hover align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Deployment / Task Description
+                        </th>
+
+                        <th style="width: 220px;">
+                            Severity Level
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr th:each="task : ${tasks}">
+
+                        <td class="fw-semibold"
+                            th:text="${task.description}">
+
+                            Task Description
+
+                        </td>
+
+                        <td>
+
+                            <span th:if="${task.priority == 'High'}"
+                                  class="badge bg-danger">
+
+                                🔥 Critical Priority
+
+                            </span>
+
+                            <span th:if="${task.priority == 'Medium'}"
+                                  class="badge bg-warning text-dark">
+
+                                ⚡ Important Priority
+
+                            </span>
+
+                            <span th:if="${task.priority == 'Low'}"
+                                  class="badge bg-success">
+
+                                ✅ Routine Priority
+
+                            </span>
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer>
+
+        <div class="container">
+
+            <div class="row align-items-center">
+
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+
+                    <h6 class="footer-title mb-1">
+                        ⚙️ DevOpsFlow Enterprise
+                    </h6>
+
+                    <small>
+                        Cloud Infrastructure • Automation • CI/CD • Monitoring
+                    </small>
+
+                </div>
+
+                <div class="col-md-6 text-center text-md-end">
+
+                    <small>
+                        Engineered by
+                        <strong>Sourav Das</strong>
+                    </small>
+
+                    <br>
+
+                    <small>
+                        📧
+                        <a href="mailto:eee.das.sourav@gmail.com">
+                            eee.das.sourav@gmail.com
+                        </a>
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+</body>
+</html>

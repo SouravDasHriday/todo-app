@@ -35,4 +35,10 @@ public class TodoController {
         }
         return "redirect:/"; // Reload the page to show the updated list
     }
+
+    @PostMapping("/clear")
+    public String clearTasks() {
+        taskList.clear();
+        return "redirect:/"; // Reload the page to show the updated list
+    }
 }
