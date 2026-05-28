@@ -1,0 +1,23 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto8
+  pre_build:
+    commands:
+      - echo "Authenticating with AWS CodeArtifact..."
+      - export CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain my-domain --domain-owner $AWS_ACCOUNT_ID --query authorizationToken --output text)
+  build:
+    commands:
+      - echo "Building the Java application..."
+      - mvn clean package -s settings.xml
+  post_build:
+    commands:
+      - echo "Build completed successfully!"
+artifacts:
+  files:
+    - target/todo-app-1.0.0.jar
+    - appspec.yml
+    - scripts/**/*
+  discard-paths: no
